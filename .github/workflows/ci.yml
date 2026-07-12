@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.12.7
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.12.7"
 
       - name: Install dependencies
         run: |
@@ -52,9 +52,12 @@ jobs:
       - name: Build Docker image with mlflow build-docker
         working-directory: MLProject
         run: |
+          # --env-manager local => install deps langsung via pip di base image
+          # (hindari virtualenv/pyenv yang meng-compile Python & sering gagal di CI)
           mlflow models build-docker \
             -m "runs:/${{ steps.run.outputs.run_id }}/model" \
-            -n "$IMAGE_NAME"
+            -n "$IMAGE_NAME" \
+            --env-manager local
 
       - name: Tag and push image to Docker Hub
         run: |
